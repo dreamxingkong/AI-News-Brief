@@ -114,12 +114,15 @@ class Program
 
         string json = JsonSerializer.Serialize(requestBody);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
-
         var response = await client.PostAsync(API_URL, content);
         string responseString = await response.Content.ReadAsStringAsync();
 
         var result = JsonSerializer.Deserialize<JsonElement>(responseString);
         var contentResult = result.GetProperty("choices")[0].GetProperty("message").GetProperty("content").GetString();
+
+        Console.WriteLine("📡 API 原始返回内容：");
+        Console.WriteLine(contentResult);
+
         return contentResult ?? "{}";
     }
 
