@@ -32,4 +32,5 @@ jobs:
           git config --local user.name "GitHub Action"
           git add index.html
           git diff --staged --quiet || git commit -m "自动更新新闻简报 [skip ci]"
-          git push
+          git pull --rebase origin main || true
+          git push --force
