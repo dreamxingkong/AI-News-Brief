@@ -105,7 +105,7 @@ class Program
 
         var requestBody = new
         {
-            model = "deepseek-v4-pro",
+            model = "deepseek-chat",
             messages = new[] { new { role = "user", content = prompt } },
             temperature = 0.6f,
             max_tokens = 4096,
