@@ -8,7 +8,6 @@ using System.Collections.Generic;
 
 class Program
 {
-    // ⚠️ 重要：只从环境变量读取，绝对不硬编码密钥！
     private static readonly string API_KEY = Environment.GetEnvironmentVariable("DEEPSEEK_API_KEY");
     private static readonly string API_URL = "https://api.deepseek.com/v1/chat/completions";
     private static readonly HttpClient client = new HttpClient();
@@ -19,45 +18,34 @@ class Program
         Console.WriteLine("   AI 新闻简报生成器");
         Console.WriteLine("========================================");
 
-        // ⭐ 第一优先级：检查密钥是否存在
         if (string.IsNullOrEmpty(API_KEY))
         {
             Console.WriteLine("");
-            Console.WriteLine("❌ 致命错误：未找到 DEEPSEEK_API_KEY 环境变量！");
+            Console.WriteLine("❌ 错误：未找到 DEEPSEEK_API_KEY 环境变量！");
             Console.WriteLine("");
             Console.WriteLine("解决方案：");
-            Console.WriteLine("  1. 本地开发：在终端执行");
-            Console.WriteLine("     export DEEPSEEK_API_KEY=sk-你的密钥");
-            Console.WriteLine("");
-            Console.WriteLine("  2. GitHub Actions：在仓库 Settings → Secrets 中添加");
-            Console.WriteLine("     Name: DEEPSEEK_API_KEY");
-            Console.WriteLine("     Secret: sk-你的密钥");
+            Console.WriteLine("  在仓库 Settings → Secrets 中添加 DEEPSEEK_API_KEY");
             Console.WriteLine("");
             Console.WriteLine("========================================");
             Environment.Exit(1);
             return;
         }
 
-        // 只打印前8位，不暴露完整密钥
         Console.WriteLine($"✅ API Key 已加载 (前8位: {API_KEY.Substring(0, 8)}...)");
         Console.WriteLine($"📅 生成日期: {DateTime.Now:yyyy年MM月dd日}");
         Console.WriteLine("========================================");
 
         try
         {
-            // 1. 调用 DeepSeek API 获取新闻数据
             Console.WriteLine("🔄 正在调用 DeepSeek API 生成新闻...");
             string rawData = await FetchNewsData();
 
-            // 2. 解析数据
             Console.WriteLine("🔄 正在解析新闻数据...");
             var (total, policy, learning, international, weather) = ParseNewsData(rawData);
 
-            // 3. 读取模板
             Console.WriteLine("🔄 正在生成 HTML 页面...");
             string template = File.ReadAllText("index.html");
 
-            // 4. 替换占位符
             string html = template
                 .Replace("{{DATE}}", DateTime.Now.ToString("yyyy年MM月dd日"))
                 .Replace("{{TOTAL_COUNT}}", total.ToString())
@@ -66,14 +54,11 @@ class Program
                 .Replace("{{INTERNATIONAL_COUNTRIES}}", international)
                 .Replace("{{WEATHER_CARDS}}", weather);
 
-            // 5. 写回文件
             File.WriteAllText("index.html", html, Encoding.UTF8);
 
             Console.WriteLine("");
             Console.WriteLine("✅ index.html 更新成功！");
             Console.WriteLine($"📊 共生成 {total} 条新闻");
-            Console.WriteLine("========================================");
-            Console.WriteLine("🔒 密钥安全：仅从环境变量读取，未写入任何文件");
             Console.WriteLine("========================================");
         }
         catch (Exception ex)
@@ -149,11 +134,11 @@ class Program
             foreach (var item in data.GetProperty("policyCards").EnumerateArray())
             {
                 policy += TemplateEngine.GenerateCard(
-                    item.GetProperty("emoji").GetString(),
-                    item.GetProperty("tag").GetString(),
-                    item.GetProperty("title").GetString(),
-                    item.GetProperty("content").GetString(),
-                    item.GetProperty("source").GetString()
+                    GetStringOrDefault(item, "emoji"),
+                    GetStringOrDefault(item, "tag"),
+                    GetStringOrDefault(item, "title"),
+                    GetStringOrDefault(item, "content"),
+                    GetStringOrDefault(item, "source")
                 );
             }
 
@@ -161,11 +146,11 @@ class Program
             foreach (var item in data.GetProperty("learningCards").EnumerateArray())
             {
                 learning += TemplateEngine.GenerateCard(
-                    item.GetProperty("emoji").GetString(),
-                    item.GetProperty("tag").GetString(),
-                    item.GetProperty("title").GetString(),
-                    item.GetProperty("content").GetString(),
-                    item.GetProperty("source").GetString()
+                    GetStringOrDefault(item, "emoji"),
+                    GetStringOrDefault(item, "tag"),
+                    GetStringOrDefault(item, "title"),
+                    GetStringOrDefault(item, "content"),
+                    GetStringOrDefault(item, "source")
                 );
             }
 
@@ -174,11 +159,13 @@ class Program
             {
                 var newsList = new List<string>();
                 foreach (var n in item.GetProperty("news").EnumerateArray())
-                    newsList.Add(n.GetString());
+                {
+                    newsList.Add(n.GetString() ?? "暂无新闻");
+                }
 
                 international += TemplateEngine.GenerateCountryCard(
-                    item.GetProperty("country").GetString(),
-                    item.GetProperty("flag").GetString(),
+                    GetStringOrDefault(item, "country"),
+                    GetStringOrDefault(item, "flag"),
                     newsList
                 );
             }
@@ -187,11 +174,11 @@ class Program
             foreach (var item in data.GetProperty("weatherCards").EnumerateArray())
             {
                 weather += TemplateEngine.GenerateCard(
-                    item.GetProperty("emoji").GetString(),
-                    item.GetProperty("tag").GetString(),
-                    item.GetProperty("title").GetString(),
-                    item.GetProperty("content").GetString(),
-                    item.GetProperty("source").GetString()
+                    GetStringOrDefault(item, "emoji"),
+                    GetStringOrDefault(item, "tag"),
+                    GetStringOrDefault(item, "title"),
+                    GetStringOrDefault(item, "content"),
+                    GetStringOrDefault(item, "source")
                 );
             }
 
@@ -202,6 +189,15 @@ class Program
             Console.WriteLine($"⚠️ 解析数据失败: {ex.Message}");
             return GetFallbackData();
         }
+    }
+
+    static string GetStringOrDefault(JsonElement element, string propertyName, string defaultValue = "")
+    {
+        if (element.TryGetProperty(propertyName, out JsonElement property))
+        {
+            return property.GetString() ?? defaultValue;
+        }
+        return defaultValue;
     }
 
     static (int, string, string, string, string) GetFallbackData()
