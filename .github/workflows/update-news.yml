@@ -2,7 +2,7 @@ name: Daily News Update
 
 on:
   schedule:
-    - cron: '0 16 * * *'   # UTC 16:00 = 北京时间 0:00 (次日凌晨)
+    - cron: '0 0 * * 3'   # 每周三 UTC 0:00 = 北京时间 8:00
   workflow_dispatch:
 
 jobs:
