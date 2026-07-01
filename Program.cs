@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 class Program
 {
-private static readonly string API_KEY = Environment.GetEnvironmentVariable("DEEPSEEK_API_KEY") ?? "";
+    private static readonly string API_KEY = Environment.GetEnvironmentVariable("DEEPSEEK_API_KEY") ?? "";
     private static readonly string API_URL = "https://api.deepseek.com/v1/chat/completions";
     private static readonly HttpClient client = new HttpClient();
 
@@ -22,10 +22,6 @@ private static readonly string API_KEY = Environment.GetEnvironmentVariable("DEE
         {
             Console.WriteLine("");
             Console.WriteLine("❌ 错误：未找到 DEEPSEEK_API_KEY 环境变量！");
-            Console.WriteLine("");
-            Console.WriteLine("解决方案：");
-            Console.WriteLine("  在仓库 Settings → Secrets 中添加 DEEPSEEK_API_KEY");
-            Console.WriteLine("");
             Console.WriteLine("========================================");
             Environment.Exit(1);
             return;
@@ -120,7 +116,8 @@ private static readonly string API_KEY = Environment.GetEnvironmentVariable("DEE
         string responseString = await response.Content.ReadAsStringAsync();
 
         var result = JsonSerializer.Deserialize<JsonElement>(responseString);
-        return result.GetProperty("choices")[0].GetProperty("message").GetProperty("content").GetString();
+        var contentResult = result.GetProperty("choices")[0].GetProperty("message").GetProperty("content").GetString();
+        return contentResult ?? "{}";
     }
 
     static (int Total, string Policy, string Learning, string International, string Weather) ParseNewsData(string raw)
