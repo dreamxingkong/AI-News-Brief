@@ -1,0 +1,26 @@
+# 编译输出
+bin/
+obj/
+*.exe
+*.dll
+
+# 用户配置
+appsettings.json
+appsettings.*.json
+user-secrets.json
+
+# 敏感文件
+*.key
+*.pem
+*.crt
+*.p12
+
+# IDE
+.vscode/
+.idea/
+*.user
+*.suo
+
+# 系统文件
+.DS_Store
+Thumbs.db
