@@ -69,6 +69,7 @@ class Program
     static async Task<string> FetchNewsData()
     {
         var prompt = @"
+请先回答这个问题,今天是哪一年几月几日,然后回答下面的问题
 你是一个新闻编辑。请生成今日新闻简报的结构化数据，按以下格式返回纯JSON：
 
 {
