@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 class Program
 {
-    private static readonly string API_KEY = Environment.GetEnvironmentVariable("DEEPSEEK_API_KEY");
+private static readonly string API_KEY = Environment.GetEnvironmentVariable("DEEPSEEK_API_KEY") ?? "";
     private static readonly string API_URL = "https://api.deepseek.com/v1/chat/completions";
     private static readonly HttpClient client = new HttpClient();
 
