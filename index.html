@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 科技简报</title>
+    <style>
+        /* 所有样式保持不变，与之前一模一样 */
+        /* ... 省略，直接复制之前提供的完整 index.html ... */
+    </style>
+</head>
+<body data-theme="mint-light">
+    <!-- 主题切换器 -->
+    <div class="theme-switcher" role="toolbar" aria-label="主题切换">
+        <button class="theme-btn" data-theme="cyber-dark" aria-label="深空暗紫赛博">
+            <span class="tooltip">深空暗紫</span>
+        </button>
+        <button class="theme-btn" data-theme="hacker-dark" aria-label="暗青工业黑客">
+            <span class="tooltip">暗青黑客</span>
+        </button>
+        <button class="theme-btn" data-theme="neon-blue" aria-label="午夜霓虹蓝">
+            <span class="tooltip">霓虹蓝</span>
+        </button>
+        <button class="theme-btn" data-theme="aurora-light" aria-label="柔化极光">
+            <span class="tooltip">极光白</span>
+        </button>
+        <button class="theme-btn active" data-theme="mint-light" aria-label="薄荷奶青">
+            <span class="tooltip">薄荷奶青</span>
+        </button>
+        <button class="theme-btn" data-theme="morandi-purple" aria-label="灰紫莫兰迪">
+            <span class="tooltip">莫兰迪</span>
+        </button>
+        <button class="theme-btn" data-theme="aurora-dark" aria-label="冷调极光深色">
+            <span class="tooltip">暗极光</span>
+        </button>
+        <button class="theme-btn" data-theme="peach-light" aria-label="蜜桃奶紫">
+            <span class="tooltip">蜜桃奶紫</span>
+        </button>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>📊 AI 科技简报</h1>
+            <div class="date">📅 {{DATE}}</div>
+            <div class="badge">🔥 今日热点 · 共 {{TOTAL_COUNT}} 条</div>
+        </div>
+
+        <h2 class="section-title">🏛️ 政策方向 <span class="sub">高考改革与扩招</span></h2>
+        <div class="grid">
+            {{POLICY_CARDS}}
+        </div>
+
+        <h2 class="section-title">📚 学习资源 <span class="sub">备考趋势分析</span></h2>
+        <div class="grid">
+            {{LEARNING_CARDS}}
+        </div>
+
+        <h2 class="section-title">🌍 国际局势 <span class="sub">按国家分类</span></h2>
+        <div class="country-grid">
+            {{INTERNATIONAL_COUNTRIES}}
+        </div>
+
+        <h2 class="section-title">🌤️ 天气简报</h2>
+        <div class="grid">
+            {{WEATHER_CARDS}}
+        </div>
+
+        <div class="footer">
+            🤖 由 DeepSeek AI 自动生成 · 每日更新 · <a href="https://github.com/你的用户名/AI-News-Brief">GitHub</a>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            const body = document.body;
+            const themeBtns = document.querySelectorAll('.theme-btn');
+
+            const savedTheme = localStorage.getItem('news-brief-theme') || 'mint-light';
+            applyTheme(savedTheme);
+
+            themeBtns.forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    applyTheme(this.getAttribute('data-theme'));
+                });
+            });
+
+            function applyTheme(theme) {
+                body.setAttribute('data-theme', theme);
+                themeBtns.forEach(function(btn) {
+                    btn.classList.toggle('active', btn.getAttribute('data-theme') === theme);
+                });
+                localStorage.setItem('news-brief-theme', theme);
+            }
+
+            if (!localStorage.getItem('news-brief-theme')) {
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+                applyTheme(prefersDark.matches ? 'cyber-dark' : 'mint-light');
+                prefersDark.addEventListener('change', function(e) {
+                    if (!localStorage.getItem('news-brief-theme')) {
+                        applyTheme(e.matches ? 'cyber-dark' : 'mint-light');
+                    }
+                });
+            }
+        })();
+    </script>
+</body>
+</html>
