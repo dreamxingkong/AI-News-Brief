@@ -1,0 +1,35 @@
+name: Daily News Update
+
+on:
+  schedule:
+    - cron: '0 16 * * *'   # UTC 16:00 = 北京时间 0:00 (次日凌晨)
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Run news generator
+        run: dotnet run --project AI-News-Brief.csproj
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add index.html
+          git diff --staged --quiet || git commit -m "自动更新新闻简报 [skip ci]"
+          git push
